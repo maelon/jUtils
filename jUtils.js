@@ -14,10 +14,17 @@
     };
     Utils.prototype = {
         /**************** debug ****************/
+        /**
+        * window.jUtils.isDebug = true  启用debug模式
+        * window.jUtils.useDebug(true)
+        */
         'isDebug': false,
         'useDebug': function (use) {
             this.isDebug = !!use;
         },
+        /**
+        * debug模式下会弹出alert
+        */
         'debugAlert': function (content, delay) {
             if (this.isDebug) {
                 setTimeout(function (msg) {
@@ -39,7 +46,7 @@
 
         /**************** clone ****************/
         /**
-        * from raphealjs
+        * from raphealjs 深度拷贝
         */
         'clone': function (obj) {
 	        if (typeof obj == "function" || Object(obj) !== obj) {
@@ -55,6 +62,9 @@
 	    },
 
         /**************** time ****************/
+        /**
+        * 将毫秒转换为[天，小时，分，秒]
+        */
         'transTime': function (time) {
             var timeArr = [];
             var day = parseInt(time / 36E5 / 24, 10);
@@ -69,6 +79,9 @@
         },
 
         /**************** apptype ****************/
+        /**
+        * 根据ua获取当前环境类型
+        */
         'appTypeEnum': {},
         'getAppType': function () {
             var ua = window.navigator.userAgent.toLowerCase();
@@ -87,6 +100,9 @@
         },
 
         /**************** class ****************/
+        /**
+        * 继承类
+        */
         'extendClass': function (child, parent) {
             if(typeof child !== 'function')
                 throw new TypeError('extendClass child must be function type');
@@ -99,9 +115,12 @@
             Transitive.prototype = parent.prototype;
             child.prototype = new Transitive();
             return child.prototype.constructor = child;
-        }
+        },
 
         /**************** object ****************/
+        /**
+        * 装饰对象
+        */
         'decorate': function (target, source) {
             for (var s in source) {
                 target[s] = source[s];
@@ -124,13 +143,22 @@
         */
         'makeSimpleGUID': function () {
             var guid = '00000000000000000000000000000000';
-            var count = this.jGUID['callCount']++;
+            var count = Math.abs(this.jGUID['callCount']++);
             var count16 = count.toString(16);
             guid = (guid + count16).slice(count16.length);
             return guid.slice(0, 8) + '-' + guid.slice(8, 12) + '-' + guid.slice(12, 16) + '-' + guid.slice(16, 20) + '-' + guid.slice(20);
         },
 
         /**************** url ****************/
+        /**
+        * 对于url的search部分进行处理
+        * http://test.com?a=123&b=&c&a=222
+        * queryList = {
+        *   a: ['123', '222'],
+        *   b: [''],
+        *   c: []
+        * }
+        */
         'queryList': undefined,
         'parseURL': function (url) {
             var a = document.createElement('a');
@@ -177,26 +205,72 @@
             !this.queryList && (this.queryList = retObj);
             return this.queryList;
         },
+        /**
+        * 要据参数名获取参数值 a -> ['123', '222']
+        */
         'getQueryString': function (name, url, ignore) {
-            var arr = [];
+            var qsList = this.getQueryList(url);
             var ig = !!ignore;
-            var queryName = ig ? name.toLowerCase() : name;
-            var qsList = this.getQueryList();
-            return qs[queryName];
+            if (ig) {
+                var queryName = name.toLowerCase();
+                var arr = [];
+                for(var name in qsList) {
+                    if (name.toLowerCase() === queryName) {
+                        arr = arr.concat(qsList[name]);
+                    }
+                }
+                return arr;
+            } else {
+                return qsList[name];
+            }
         },
-        'setQueryString': function (query, url, allignore, needtidy) {
+        /**
+        * 将参数对象转换为url search
+        * 例如 http://test.com?a=123&b=12
+        *    设置参数  {
+        *                  a: 222, 改变值
+        *                  b: null, 删除
+        *                  c: haha 新增
+        *              }
+        *       转换为 ?a=222&c=haha
+        */
+        'setQueryString': function (query, url, ignore, needtidy) {
             var qsList = url ? this.getQueryList(url) : this.clone(this.queryList);
+            var qName;
+            var hasQS = function (name, list, ignore) {
+                if (ignore) {
+                    for(var s in list) {
+                        if (s.toLowerCase() === name.toLowerCase()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                } else {
+                    return list[name] !== undefined;
+                }
+            };
             for (var name in query) {
-                !!allignore && (name = name.toLowerCase());
-                if (qsList[name] === undefined) {
-                    if (query[name] !== null) {
-                        qsList[name] = query[name] instanceof Array ? query[name] : [query[name]];
+                if (hasQS(name, qsList, ignore)) {
+                    if (ignore) {
+                        for(var qname in qsList) {
+                            if (qname.toLowerCase() === name.toLowerCase()) {
+                                if (query[name] !== null) {
+                                    qsList[qname] = qsList[qname].concat(query[name] instanceof Array ? query[name] : [query[name]]);
+                                } else {
+                                    delete qsList[qname];
+                                }
+                            }
+                        }
+                    } else {
+                        if (query[name] !== null) {
+                            qsList[name] = qsList[name].concat(query[name] instanceof Array ? query[name] : [query[name]]);
+                        } else {
+                            delete qsList[name];
+                        }
                     }
                 } else {
                     if (query[name] !== null) {
-                        qsList[name] = qsList[name].concat(query[name] instanceof Array ? query[name] : [query[name]]);
-                    } else {
-                        delete qsList[name];
+                        qsList[name] = query[name] instanceof Array ? query[name] : [query[name]];
                     }
                 }
             }
@@ -225,9 +299,12 @@
             }
             return '?' + qs.join('&');
         },
-        'setQueryStringURL': function (query, url, allignore, needtidy) {
+        /**
+        * 输出结果为完整url
+        */
+        'setQueryStringURL': function (query, url, ignore, needtidy) {
             var urlLoc = url ? this.parseURL(url) : window.location;
-            return urlLoc.protocol + '//' + urlLoc.host + urlLoc.pathname + this.setQueryString(query, url, allignore, needtidy) + urlLoc.hash;
+            return urlLoc.protocol + '//' + urlLoc.host + urlLoc.pathname + this.setQueryString(query, url, ignore, needtidy) + urlLoc.hash;
         },
 
         /**************** cookie ****************/
@@ -303,5 +380,5 @@
     };
 
     scope = new Utils();
-})(window.jUtils || (window.jUtils = {}));
 
+})(window.jUtils || (window.jUtils = {}));
