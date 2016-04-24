@@ -26,6 +26,34 @@
             }
         },
 
+        /**************** trim ****************/
+        'trim': function (str) {
+            return str.replace(/(^\s*)|(\s*$)/g, ''); 
+        },
+        'ltrim': function (str) {
+            return str.replace(/(^\s*)/g, ''); 
+        },
+        'rtrim': function (str) {
+            return str.replace(/(\s*$)/g, ''); 
+        },
+
+        /**************** clone ****************/
+        /**
+        * from raphealjs
+        */
+        'clone': function (obj) {
+	        if (typeof obj == "function" || Object(obj) !== obj) {
+	            return obj;
+	        }
+	        var res = new obj.constructor;
+	        for (var key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    res[key] = this.clone(obj[key]);
+                }
+            }
+	        return res;
+	    },
+
         /**************** time ****************/
         'transTime': function (time) {
             var timeArr = [];
@@ -119,124 +147,114 @@
             };
         },
         'getQueryList': function (url) {
+            if (url === undefined && this.queryList !== undefined) {
+                return this.queryList;
+            }
             var search = url ? this.parseURL(url).search : window.location.search;
             var result = search.match(new RegExp('[?&][^?&]+=?[^?&]*', 'g'));
             if (result === null) {
                 if (url) {
                     return [];
-                }!this._queryList && (this._queryList = []);
-                return this._queryList;
+                }
+                !this.queryList && (this.queryList = {});
+                return this.queryList;
             }
-            for (var i = 0; i < result.length; i++) {
-                result[i] = result[i].substring(1);
-            }
-            var names = [];
-            var arr = [];
+            var retObj = {};
             var name;
             var qs;
-            for (i = 0; i < result.length; i++) {
+            for (var i = 0; i < result.length; i++) {
+                result[i] = result[i].substring(1);
                 qs = result[i].split('=');
                 name = qs[0];
-                if (names.indexOf(name) > -1) {
-                    for (var j = 0; j < arr.length; j++) {
-                        if ((arr[j].split('='))[0] === name) {
-                            arr[j] = name + '=' + qs[1];
-                        }
-                    }
-                }
-                else {
-                    names.push(name);
-                    arr.push(name + '=' + qs[1]);
+                if (retObj[name] !== undefined) {
+                    qs.length > 1 && retObj[name].push(qs[1]);
+                } else {
+                    retObj[name] = qs.length > 1 : [qs[1]] : [];
                 }
             }
             if (url)
-                return arr;
-            !this._queryList && (this._queryList = arr);
-            return this._queryList;
+                return retObj;
+            !this.queryList && (this.queryList = retObj);
+            return this.queryList;
         },
-        'getQueryString': function (name, ignore, url) {
+        'getQueryString': function (name, url, ignore) {
             var arr = [];
             var ig = !!ignore;
             var queryName = ig ? name.toLowerCase() : name;
-            var qs = (function (scope) {
-                if (!url && scope._queryList && scope._queryList.length > 0) {
-                    return scope._queryList;
-                }
-                return scope.getQueryList(url);
-            })(this);
-            var q;
-            var isTrue;
-            for (var i = 0; i < qs.length; i++) {
-                q = qs[i].split('=');
-                isTrue = ((ig ? q[0].toLowerCase() : q[0]) === queryName);
-                if (isTrue) {
-                    arr.push(q[1]);
-                }
-            }
-            return arr;
+            var qsList = this.getQueryList();
+            return qs[queryName];
         },
-        'setQueryString': function (query, url, allignore) {
-            var qs = url ? this.getQueryList(url).concat() : this._queryList.concat();
-            var q;
-            var qNamep;
-            var namep;
-            var qName;
-            var qValue;
-            var add = [];
+        'setQueryString': function (query, url, allignore, needtidy) {
+            var qsList = url ? this.getQueryList(url) : this.clone(this.queryList);
             for (var name in query) {
-                var has = false;
-                if (qs.length) {
-                    for (var i = 0; i < qs.length; i++) {
-                        q = qs[i].split('=');
-                        qName = q[0];
-                        qValue = query[name];
-                        if (allignore) {
-                            qNamep = qName.toLowerCase();
-                            namep = name.toLowerCase();
-                        }
-                        else {
-                            qNamep = qName;
-                            namep = name;
-                        }
-                        if (qNamep === namep) {
-                            has = true;
-                            if (qValue === null)
-                                qs[i] = '';
-                            else
-                                qs[i] = qName + '=' + qValue;
-                        }
+                !!allignore && (name = name.toLowerCase());
+                if (qsList[name] === undefined) {
+                    if (query[name] !== null) {
+                        qsList[name] = query[name] instanceof Array ? query[name] : [query[name]];
+                    }
+                } else {
+                    if (query[name] !== null) {
+                        qsList[name] = qsList[name].concat(query[name] instanceof Array ? query[name] : [query[name]]);
+                    } else {
+                        delete qsList[name];
                     }
                 }
-                if (!has) {
-                    if (query[name] !== null)
-                        add.push(name);
-                }
             }
-            for (var i = 0; i < qs.length; i++) {
-                if (qs[i] === '') {
-                    qs.splice(i, 1);
-                    i--;
+            var qs = [];
+            var qv;
+            for (name in qsList) {
+                if (!!needtidy) {
+                    if (qsList[name].length > 0) {
+                        qv = qsList[name].pop();
+                        qv !== null && qs.push(name + '=' + qv);
+                    } else {
+                        qs.push(name);
+                    }
+                } else {
+                    if (qsList[name].length > 0) {
+                        if(qsList[name].indexOf(null) < 0) {
+                            for(var i = 0; i < qsList[name].length; i++) {
+                                qv = qsList[name][i];
+                                qs.push(name + '=' + qv);
+                            }
+                        }
+                    } else {
+                        qs.push(name);
+                    }
                 }
-            }
-            for (var i = 0; i < add.length; i++) {
-                qs.push(add[i] + '=' + query[add[i]]);
             }
             return '?' + qs.join('&');
         },
-        'setQueryStringURL': function (queryObj, url) {
+        'setQueryStringURL': function (query, url, allignore, needtidy) {
             var urlLoc = url ? this.parseURL(url) : window.location;
-            return urlLoc.protocol + '//' + urlLoc.host + urlLoc.pathname + this.setQueryString(queryObj) + urlLoc.hash;
+            return urlLoc.protocol + '//' + urlLoc.host + urlLoc.pathname + this.setQueryString(query, url, allignore, needtidy) + urlLoc.hash;
         },
+
+        /**************** cookie ****************/
         'setCookie': function (name, value, expires) {
-            hui.util.setCookie(name, value, expires);
+            var exp = new Date();
+            exp.setTime(exp.getTime() + expires);
+            document.cookie = name + '=' + escape(value) + '; path=/; expires=' + exp.toGMTString();
         },
         'getCookie': function (name) {
-            var value = hui.util.getCookie(name);
-            return value;
+            var reg = new RegExp('(^| )' + name + '=([^;]*)(;|$)');
+            var arr;
+            if(arr = document.cookie.match(reg)){
+                return unescape(arr[2]);
+            } else{
+                return null;
+            }
         },
         'removeCookie': function (name) {
-            hui.util.removeCookie(name);
+            var exp = new Date();
+            exp.setTime(exp.getTime() - 1);
+            var cval = this.getCookie(name);
+            if(cval !== null){
+                document.cookie = name + '=' + cval + '; path=/; expires=' + exp.toGMTString();
+            }
         },
+
+        /**************** validate ****************/
         'validatePhoneNumberFormat': function (phoneNumber) {
             var phoneReg = /^(1((3[0-9])|(5[0-3|5-9])|(8[0-9])|(45|47|7[6-8]|70))\d{8})$/;
             if (phoneReg.test(phoneNumber)) {
@@ -249,6 +267,16 @@
         },
         'validatePhoneCodeFormat': function (code) {
             var codeReg = /^[\d]{4}$/;
+            if (codeReg.test(code)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+            return false;
+        },
+        'validatePhoneCode6Format': function (code) {
+            var codeReg = /^[\d]{6}$/;
             if (codeReg.test(code)) {
                 return true;
             }
