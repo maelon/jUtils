@@ -128,6 +128,41 @@
             return target;
         },
 
+
+        /**************** css class ****************/
+        'css': function (dom, attr, value) {
+            switch (arguments.length) {
+                case 2:
+                    if (typeof arguments[1] === 'object') {
+                        for (var name in attr) {
+                            dom.style[name] = attr[name];
+                        }
+                    } else {
+                        return dom.currentStyle ? dom.currentStyle[attr] : getComputedStyle(dom, null)[attr]
+                    }
+                    break;
+                case 3:
+                    obj.style[attr] = value;
+                    break;
+                default:
+                    return '';
+            }
+        },
+        'hasClass': function (dom, cls) {
+            return dom.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));
+        },
+        'addClass': function (dom, cls) {
+            if (!this.hasClass(obj, cls)) {
+                obj.className = obj.className.split(/\s+/).push(cls + '').join(' ');
+            }
+        },
+        'removeClass': function (dom, cls) {
+            if (this.hasClass(dom, cls)) {
+                var reg = new RegExp('(\\s+|^)' + cls + '(\\s+|$)');
+                dom.className = dom.className.replace(reg, ' ');
+            }
+        },
+
         /**************** GUID ****************/
         /**
         * GUID静态属性
