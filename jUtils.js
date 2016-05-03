@@ -168,7 +168,7 @@
         * GUID静态属性
         * Added by maelon 2015-07-24 14:37
         */
-        'jGUID' = {
+        'jGUID': {
             '__version': '0.1.0',
             'callCount': 0
         },
