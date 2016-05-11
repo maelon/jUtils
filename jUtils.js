@@ -232,7 +232,7 @@
                 if (retObj[name] !== undefined) {
                     qs.length > 1 && retObj[name].push(qs[1]);
                 } else {
-                    retObj[name] = qs.length > 1 : [qs[1]] : [];
+                    retObj[name] = qs.length > 1 ? [qs[1]] : [];
                 }
             }
             if (url)
@@ -407,14 +407,16 @@
             }
             return false;
         },
-        /**
+                /**
         * data:{
         *     method:DOMString,
         *     url:DOMString,
         *     asynic:boolean,
         *     dataType:DOMString,
+        *     withCredentials: boolen,
         *     header:Object,
         *     data:DOMString/FormData,
+        *     timeout: Number,
         *     success:function,
         *     error:function
         * }
@@ -445,50 +447,94 @@
             }
 
             if(xhr) {
+                //'' 'arraybuffer' 'blob' 'document' 'json' 'text'
                 if(data['dataType'] && typeof data['dataType'] === 'string') {
-                    xhr.responseType = data['dataType'];
+                    xhr.responseType = data['dataType'].toLowerCase();
                 }
+
+                if(data['timeout'] !== undefined) {
+                    xhr.timeout = parseInt(data['timeout']) || 0;
+                }
+
                 xhr.jajax = {};
                 if(data['success'] && typeof data['success'] === 'function') {
                     xhr.jajax['success'] = data['success'];
                 }
+                if(data['error'] && typeof data['error'] === 'function') {
+                    xhr.jajax['error'] = data['error'];
+                }
+                if(data['withCredentials'] !== undefined) {
+                    xhr.withCredentials = !!data['withCredentials'];
+                }
+
                 xhr.onreadystatechange = function (e) {
                     if(this.readyState === 4) {
                         if(this.status === 200) {
                             if(this.responseType === '' || this.responseType === 'text') {
-                                this.jajax['success'] && this.jajax['success'](this.response);
+                                this.jajax['success'] && this.jajax['success'](this.responseText, this);
+                            } else if(this.responseType === 'json') {
+                                this.jajax['success'] && this.jajax['success'](this.response, this);
                             }
                         } else {
-                            this.jajax['error'] && this.jajax['error'](this.statusText);
+                            this.jajax['error'] && this.jajax['error'](this.statusText, this);
                         }
                     }
                 }
+
                 method = method || 'get';
                 var async = data['async'] || true;
                 var sendData = data['data'] || null;
-                xhr.open(method, url, async);
-                if(data['header'] && Object.prototype.toString.call(data['header']) === '[object Object]') {
-                    var header = data['header'];
-                    for(var s in header) {
-                        if(s.toLowerCase() === 'contenttype' && method === 'post') {
-                            xhr.setRequestHeader('Content-Type', this.__jajax['contentType'][header[s]]);
-                            break;
-                        }
-                        xhr.setRequestHeader(s, header[s]);
+                var serializeSendData = function (data, type) {
+                    if(data) {
+                       if(Object.prototype.toString.call(data) === '[object Object]') {
+                           if(type === 'json') {
+                               return JSON.stringify(data);
+                           } else if(type === 'form' || type === null) {
+                               var dataArr = [];
+                               for(var s in data) {
+                                   if(data[s]) {
+                                       dataArr.push(s + '=' + data[s]);
+                                       continue;
+                                   }
+                                   dataArr.push(s);
+                               }
+                               return dataArr.join('&');
+                           }
+                       } else {
+                           return '' + data;
+                       }
                     }
-                }
-                if(sendData && Object.prototype.toString.call(sendData) === '[object Object]') {
-                    var dataArr = [];
-                    for(var s in sendData) {
-                        if(sendData[s]) {
-                            dataArr.push(s + '=' + sendData[s]);
-                            continue;
+                    return '';
+                };
+                if(method === 'get') {
+                    var data = serializeSendData(sendData);
+                    url = url.replace(/((\?*&*|&*\?*)#\w*)$/, '');
+                    url = url + (url.indexOf('?') < 0 ? '?' : '') + data;
+                    xhr.open(method, url, async);
+                    xhr.send();
+                } else if(method === 'post') {
+                    xhr.open(method, url, async);
+                    var dataType = 'form';
+                    if(data['header'] && Object.prototype.toString.call(data['header']) === '[object Object]') {
+                        var header = data['header'];
+                        for(var s in header) {
+                            if(s.toLowerCase() === 'contenttype') {
+                                var contenttype = this.__jajax['contentType'][header[s]] || header[s];
+                                xhr.setRequestHeader('Content-Type', contenttype);
+                                if(contenttype.indexOf('x-www-form-urlencoded') > -1) {
+                                    dataType = 'form';
+                                } else if(contenttype.indexOf('json') > -1) {
+                                    dataType = 'json';
+                                }
+                                continue;
+                            }
+                            xhr.setRequestHeader(s, header[s]);
                         }
-                        dataArr.push(s);
                     }
-                    sendData = dataArr.join('&');
+                    xhr.send(serializeSendData(sendData, dataType));
                 }
-                xhr.send(sendData);
+            } else {
+                throw new Error('Not support xmlhttprequest');
             }
         },
         /**
