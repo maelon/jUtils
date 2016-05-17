@@ -1,0 +1,28 @@
+{
+  "name": "jutils",
+  "version": "1.0.0",
+  "description": "utils for js",
+  "main": "jUtils.js",
+  "dependencies": {},
+  "devDependencies": {
+    "webpack": "^1.13.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf dist/* && webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maelon/jUtils.git"
+  },
+  "keywords": [
+    "util",
+    "utils"
+  ],
+  "author": "maelon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/maelon/jUtils/issues"
+  },
+  "homepage": "https://github.com/maelon/jUtils#readme"
+}
