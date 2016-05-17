@@ -557,4 +557,4 @@
 
     scope = new Utils();
 
-})(window.jUtils || (window.jUtils = {}));
+})(window.jUtils = window.jUtils || {});
