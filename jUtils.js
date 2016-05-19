@@ -6,7 +6,7 @@
 # Description: jUtils
 ===================================================================*/
 
-(function (scope) {
+window.jUtils = (function () {
 
     var Utils = function () {
         if (Utils._instance)
@@ -142,7 +142,7 @@
                     }
                     break;
                 case 3:
-                    obj.style[attr] = value;
+                    dom.style[attr] = value;
                     break;
                 default:
                     return '';
@@ -152,8 +152,10 @@
             return dom.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));
         },
         'addClass': function (dom, cls) {
-            if (!this.hasClass(obj, cls)) {
-                obj.className = obj.className.split(/\s+/).push(cls + '').join(' ');
+            if (!this.hasClass(dom, cls)) {
+                var classes = dom.className.split(/\s+/);
+                classes.push(cls + '');
+                dom.className = classes.join(' ');
             }
         },
         'removeClass': function (dom, cls) {
@@ -211,7 +213,7 @@
         },
         'getQueryList': function (url) {
             if (url === undefined && this.queryList !== undefined) {
-                return this.queryList;
+                return this.clone(this.queryList);
             }
             var search = url ? this.parseURL(url).search : window.location.search;
             var result = search.match(new RegExp('[?&][^?&]+=?[^?&]*', 'g'));
@@ -220,7 +222,7 @@
                     return [];
                 }
                 !this.queryList && (this.queryList = {});
-                return this.queryList;
+                return this.clone(this.queryList);
             }
             var retObj = {};
             var name;
@@ -238,7 +240,7 @@
             if (url)
                 return retObj;
             !this.queryList && (this.queryList = retObj);
-            return this.queryList;
+            return this.clone(this.queryList);
         },
         /**
         * 要据参数名获取参数值 a -> ['123', '222']
@@ -270,7 +272,7 @@
         *       转换为 ?a=222&c=haha
         */
         'setQueryString': function (query, url, ignore, needtidy) {
-            var qsList = url ? this.getQueryList(url) : this.clone(this.queryList);
+            var qsList = this.getQueryList(url);
             var qName;
             var hasQS = function (name, list, ignore) {
                 if (ignore) {
@@ -507,7 +509,7 @@
                     return '';
                 };
                 if(method === 'get') {
-                    var data = serializeSendData(sendData);
+                    var data = serializeSendData(sendData, 'form');
                     url = url.replace(/((\?*&*|&*\?*)#\w*)$/, '');
                     url = url + (url.indexOf('?') < 0 ? '?' : '') + data;
                     xhr.open(method, url, async);
@@ -555,6 +557,5 @@
         return Utils._instance;
     };
 
-    scope = new Utils();
-
-})(window.jUtils = window.jUtils || {});
+    return new Utils();
+})();
