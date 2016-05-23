@@ -164,6 +164,101 @@ window.jUtils = (function () {
                 dom.className = dom.className.replace(reg, ' ');
             }
         },
+        /**
+         * css {'div': {'animate': 'move 1s', 'color': '#000'}}
+         * keyframe {'move': {'from': {'width': '0'}, 'to': {'width': '100'}}}
+         */
+        'createStyleSheet': function (css, keyframe) {
+            var style = document.createElement('style');
+            style.type = 'text/css';
+            document.head.appendChild(style);
+            var prefix = ['', '-webkit-', '-moz-'];
+            var formatCSS = function (css, pf) {
+                var rulesObj;
+                var rulesArr;
+                var retArr = [];
+                for(var selector in css) {
+                    rulesObj = css[selector];
+                    rulesArr = [];
+                    for(var prop in rulesObj) {
+                        if(['animate', 'transform', 'transform-origin'].indexOf(prop) < 0) {
+                            rulesArr.push(prop + ':' + rulesObj[prop] + ';');
+                        } else {
+                            if(pf !== undefined) {
+                                rulesArr.push(pf + prop + ':' + rulesObj[prop] + ';');
+                            } else {
+                                for(var i = 0; i < prefix.length; i++) {
+                                    rulesArr.push(prefix[i] + prop + ':' + rulesObj[prop] + ';');
+                                }
+                            }
+                        }
+                    }
+                    retArr.push(selector + ' {' + rulesArr.join('') + '}');
+                }
+                return retArr;
+            };
+            var cssList = formatCSS(css);
+            var frameList = [];
+            var arr;
+            if(keyframe) {
+                arr = [];
+                for(var keyname in keyframe) {
+                    for(var i = 0; i < prefix.length; i++) {
+                        frameList = formatCSS(keyframe[keyname], prefix[i]);
+                        arr.push('@' + prefix[i] + 'keyframes ' + keyname + ' {' + frameList.join(' ') + '}');
+                    }
+                }
+                frameList = arr;
+            }
+            cssList = cssList.concat(frameList);
+            for(i = 0; i < cssList.length; i++) {
+                //style.sheet.insertRule(cssList[i], style.sheet.cssRules.length);
+                style.appendChild(document.createTextNode(cssList[i]));
+            }
+            return style.sheet;
+        },
+        'requestAnimFrame': (function () {
+            return (
+                window.requestAnimationFrame ||
+                    window.webkitRequestAnimationFrame ||
+                    window.mozRequestAnimationFrame ||
+                    window.oRequestAnimationFrame ||
+                    window.msRequestAnimationFrame ||
+                    function (callback) {
+                    window.setTimeout(callback, 1000 / 33);
+                });
+        })(),
+        'cancelAnimFrame': (function (id) {
+            return (
+                window.cancelAnimationFrame ||
+                    window.webkitCancelAnimationFrame ||
+                    window.mozCancelAnimationFrame ||
+                    window.oCancelAnimationFrame ||
+                    window.msCancelAnimationFrame ||
+                    function (id) {
+                    window.clearTimeout(id);
+                });
+        })(),
+        'fixCanvasSmooth': function (canvas) {
+            var ctx = canvas.getContext('2d');
+            var devicePixelRatio = window.devicePixelRatio || 1;
+            var backingStorePixelRatio = ctx.backingStorePixelRatio ||
+                ctx.webkitBackingStorePixelRatio ||
+                ctx.mozBackingStorePixelRatio ||
+                ctx.msBackingStorePixelRatio ||
+                ctx.oBackingStorePixelRatio || 1;
+            if (devicePixelRatio !== backingStorePixelRatio) {
+                var ratio = devicePixelRatio / backingStorePixelRatio;
+                var oldWidth = canvas.width;
+                var oldHeight = canvas.height;
+                canvas.width = oldWidth * ratio;
+                canvas.height = oldHeight * ratio;
+                canvas.style.width = oldWidth + 'px';
+                canvas.style.height = oldHeight + 'px';
+                ctx.scale(ratio, ratio);
+            }
+        },
+
 
         /**************** GUID ****************/
         /**
