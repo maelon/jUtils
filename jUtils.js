@@ -73,10 +73,10 @@ window.jUtils = (function () {
             var second = parseInt((time - day * 24 * 36E5 - hour * 36E5 - minute * 6E4) / 1E3, 10);
             var timezoneOffset = (new Date()).getTimezoneOffset() / 60;
             var zoneHour = hour - timezoneOffset;
-            timeArr.push(day > 0 ? day : '');
-            timeArr.push(zoneHour > 0 ? zoneHour : '');
-            timeArr.push(minute > 0 ? minute : '');
-            timeArr.push(second > 0 ? second : '');
+            timeArr.push(day >= 0 ? day : '');
+            timeArr.push(zoneHour >= 0 ? zoneHour : '');
+            timeArr.push(minute >= 0 ? minute : '');
+            timeArr.push(second >= 0 ? second : '');
             return timeArr;
         },
 
