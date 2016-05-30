@@ -64,8 +64,9 @@ window.jUtils = (function () {
         /**************** time ****************/
         /**
         * 将毫秒转换为[天，小时，分，秒]
+        * format true将小时，分，秒写成两位字符
         */
-        'transTime': function (time) {
+        'transTime': function (time, format) {
             var timeArr = [];
             var day = parseInt(time / 36E5 / 24, 10);
             var hour = parseInt((time - day * 24 * 36E5) / 36E5 % 24, 10);
@@ -74,9 +75,9 @@ window.jUtils = (function () {
             var timezoneOffset = (new Date()).getTimezoneOffset() / 60;
             var zoneHour = hour - timezoneOffset;
             timeArr.push(day >= 0 ? day : '');
-            timeArr.push(zoneHour >= 0 ? zoneHour : '');
-            timeArr.push(minute >= 0 ? minute : '');
-            timeArr.push(second >= 0 ? second : '');
+            timeArr.push(zoneHour >= 0 ? (format ? ((zoneHour > 9 ? '' : '0') + zoneHour) : zoneHour) : '');
+            timeArr.push(minute >= 0 ? (format ? ((minute > 9 ? '' : '0') + minute) : minute) : '');
+            timeArr.push(second >= 0 ? (format ? ((second > 9 ? '' : '0') + second) : second) : '');
             return timeArr;
         },
 
