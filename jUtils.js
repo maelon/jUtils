@@ -647,7 +647,46 @@ window.jUtils = (function () {
                 'json': 'application/json; charset=utf-8',
                 'multipart': 'multipart/form-data; charset=utf-8'
             }
+        },
+
+        'mergeSortArray': function (list, comparefunc) {
+
+            function _merge(left, right, comparefunc) {
+                var result  = [];
+                var il = 0;
+                var ir = 0;
+                while(il < left.length && ir < right.length) {
+                    if(typeof comparefunc === 'function') {
+                        if(comparefunc(left[il], right[ir]) <= 0) {
+                            result.push(left[il++]);
+                        } else {
+                            result.push(right[ir++]);
+                        }
+                    } else {
+                        if(left[il] <= right[ir]) {
+                            result.push(left[il++]);
+                        } else {
+                            result.push(right[ir++]);
+                        }
+                    }
+                }
+                return result.concat(left.slice(il)).concat(right.slice(ir));
+            }
+
+            function _mergeSort(items, comparefunc){
+                if (items.length < 2) {
+                    return items;
+                }
+                var middle = Math.floor(items.length / 2);
+                var left = items.slice(0, middle);
+                var right = items.slice(middle);
+
+                return _merge(_mergeSort(left, comparefunc), _mergeSort(right, comparefunc), comparefunc);
+            }
+
+            return _mergeSort(list, comparefunc);
         }
+
     };
     Utils.getInstance = function () {
         if (!Utils._instance)
