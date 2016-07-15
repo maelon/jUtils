@@ -4,6 +4,7 @@
 #       Email: maelon.j@gmail.com
 #  CreateTime: 2016-04-21 22:31
 # Description: jUtils
+#     Version: v1.0.1
 ===================================================================*/
 
 window.jUtils = (function () {
