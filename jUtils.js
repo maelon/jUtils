@@ -261,7 +261,24 @@ window.jUtils = (function () {
                 ctx.scale(ratio, ratio);
             }
         },
-
+        'getElementLeft': function (element){
+            var actualLeft = element.offsetLeft;
+            var current = element.offsetParent;
+            while (current !== null){
+                actualLeft += current.offsetLeft;
+                current = current.offsetParent;
+            }
+            return actualLeft;
+        },
+        'getElementTop':function (element){
+            var actualTop = element.offsetTop;
+            var current = element.offsetParent;
+            while (current !== null){
+                actualTop += current.offsetTop;
+                current = current.offsetParent;
+            }
+            return actualTop;
+        },
 
         /**************** GUID ****************/
         /**
@@ -507,7 +524,7 @@ window.jUtils = (function () {
             }
             return false;
         },
-                /**
+        /**
         * data:{
         *     method:DOMString,
         *     url:DOMString,
@@ -582,7 +599,7 @@ window.jUtils = (function () {
                 }
 
                 method = method || 'get';
-                var async = data['async'] || true;
+                var async = data['async'] !== undefined ? !!data['async'] : true;
                 var sendData = data['data'] || null;
                 var serializeSendData = function (data, type) {
                     if(data) {
@@ -609,7 +626,7 @@ window.jUtils = (function () {
                 if(method === 'get') {
                     var data = serializeSendData(sendData, 'form');
                     url = url.replace(/((\?*&*|&*\?*)#\w*)$/, '');
-                    url = url + (url.indexOf('?') < 0 ? '?' : '') + data;
+                    url = url + (url.indexOf('?') < 0 ? (data ? '?' : '') : '') + data;
                     xhr.open(method, url, async);
                     xhr.send();
                 } else if(method === 'post') {

@@ -9,12 +9,11 @@ module.exports = {
     },
     'output': {
         'path': path.resolve(__dirname, 'dist'),
-        'filename': '[name].min.js',
-        'sourceMapFilename': '[name].min.js.map'
+        'filename': '[name].min.js'
     },
-    'devtool': 'source-map',
+    'devtool': false,
     'resolveLoader': {
-        'modulesDirectories': [path.resolve(__dirname, '../node_modules')]
+        'modulesDirectories': [path.resolve(__dirname, './node_modules')]
     },
     'plugins': [
         new webpack.optimize.UglifyJsPlugin({
