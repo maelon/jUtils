@@ -4,7 +4,8 @@
 #       Email: maelon.j@gmail.com
 #  CreateTime: 2016-04-21 22:31
 # Description: jUtils
-#     Version: v1.0.1
+#     Version: v1.1.0
+# Updated by maelon 2016-07-27 13:42
 ===================================================================*/
 
 window.jUtils = (function () {
@@ -132,7 +133,6 @@ window.jUtils = (function () {
             return target;
         },
 
-
         /**************** css class ****************/
         'css': function (dom, attr, value) {
             switch (arguments.length) {
@@ -243,6 +243,42 @@ window.jUtils = (function () {
                     window.clearTimeout(id);
                 });
         })(),
+        'getElementLeft': function (element){
+            var actualLeft = element.offsetLeft;
+            var current = element.offsetParent;
+            while (current !== null){
+                actualLeft += current.offsetLeft;
+                current = current.offsetParent;
+            }
+            return actualLeft;
+        },
+        'getElementTop':function (element){
+            var actualTop = element.offsetTop;
+            var current = element.offsetParent;
+            while (current !== null){
+                actualTop += current.offsetTop;
+                current = current.offsetParent;
+            }
+            return actualTop;
+        },
+
+        /**************** canvas ****************/
+        /**
+        * img: img dom
+        * quality: number 0~1
+        */
+        'transImageToBase64': function(img, quality) {
+            var canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            var context = canvas.getContext('2d');
+            context.fillStyle = '#FFF';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(img, 0, 0, canvas.width, canvas.height);
+            var dataurl = canvas.toDataURL('image/jpeg', quality);
+            return dataurl;
+        },
+
         'fixCanvasSmooth': function (canvas) {
             var ctx = canvas.getContext('2d');
             var devicePixelRatio = window.devicePixelRatio || 1;
@@ -261,24 +297,6 @@ window.jUtils = (function () {
                 canvas.style.height = oldHeight + 'px';
                 ctx.scale(ratio, ratio);
             }
-        },
-        'getElementLeft': function (element){
-            var actualLeft = element.offsetLeft;
-            var current = element.offsetParent;
-            while (current !== null){
-                actualLeft += current.offsetLeft;
-                current = current.offsetParent;
-            }
-            return actualLeft;
-        },
-        'getElementTop':function (element){
-            var actualTop = element.offsetTop;
-            var current = element.offsetParent;
-            while (current !== null){
-                actualTop += current.offsetTop;
-                current = current.offsetParent;
-            }
-            return actualTop;
         },
 
         /**************** GUID ****************/
