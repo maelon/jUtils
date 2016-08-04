@@ -4,8 +4,8 @@
 #       Email: maelon.j@gmail.com
 #  CreateTime: 2016-04-21 22:31
 # Description: jUtils
-#     Version: v1.1.0
-# Updated by maelon 2016-07-27 13:42
+#     Version: v1.1.1
+# Updated by maelon 2016-08-04 11:26
 ===================================================================*/
 
 window.jUtils = (function () {
@@ -295,7 +295,6 @@ window.jUtils = (function () {
                 canvas.height = oldHeight * ratio;
                 canvas.style.width = oldWidth + 'px';
                 canvas.style.height = oldHeight + 'px';
-                ctx.scale(ratio, ratio);
             }
         },
 
