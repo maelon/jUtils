@@ -4,8 +4,8 @@
 #       Email: maelon.j@gmail.com
 #  CreateTime: 2016-04-21 22:31
 # Description: jUtils
-#     Version: v1.1.1
-# Updated by maelon 2016-08-04 11:26
+#     Version: v1.1.2
+# Updated by maelon 2016-09-07 17:06
 ===================================================================*/
 
 window.jUtils = (function () {
@@ -720,8 +720,17 @@ window.jUtils = (function () {
             }
 
             return _mergeSort(list, comparefunc);
-        }
+        },
 
+        'detectOS': function () {
+            var ua = window.navigator.userAgent;
+            if((/iPhone|iPad|iPod/i).test(ua)) {
+                return 'ios';
+            } else if((/android/i).test(ua)) {
+                return 'android';
+            }
+            return 'other';
+        }
     };
     Utils.getInstance = function () {
         if (!Utils._instance)
