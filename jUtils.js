@@ -8,7 +8,7 @@
 # Updated by maelon 2016-09-07 17:06
 ===================================================================*/
 
-module.exports = (function () {
+module.exports = (function jUtils() {
 
     var Utils = function () {
         if (Utils._instance)
