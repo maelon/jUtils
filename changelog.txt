@@ -1,3 +1,6 @@
+v1.2.1 2016-10-17 14:34
+publish to npm
+
 v1.2.0 2016-10-17 14:08
 publish to npm
 
