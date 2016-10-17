@@ -1,3 +1,6 @@
+v1.2.0 2016-10-17 14:08
+publish to npm
+
 v1.1.2 2016-09-07 17:06
 add api detectOS
 

@@ -4,11 +4,11 @@
 #       Email: maelon.j@gmail.com
 #  CreateTime: 2016-04-21 22:31
 # Description: jUtils
-#     Version: v1.1.2
+#     Version: v1.2.0
 # Updated by maelon 2016-09-07 17:06
 ===================================================================*/
 
-window.jUtils = (function () {
+module.exports = (function () {
 
     var Utils = function () {
         if (Utils._instance)
