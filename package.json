@@ -5,6 +5,7 @@
   "main": "jUtils.js",
   "dependencies": {},
   "devDependencies": {
+    "mocha": "^3.1.2",
     "webpack": "^1.13.0"
   },
   "scripts": {
