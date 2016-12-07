@@ -4,8 +4,8 @@
 #       Email: maelon.j@gmail.com
 #  CreateTime: 2016-04-21 22:31
 # Description: jUtils
-#     Version: v1.2.1
-# Updated by maelon 2016-10-17 14:34
+#     Version: v1.2.2
+# Updated by maelon 2016-12-07 18:30
 ===================================================================*/
 
 module.exports = (function jUtils() {
@@ -583,8 +583,10 @@ module.exports = (function jUtils() {
 
             if(xhr) {
                 //'' 'arraybuffer' 'blob' 'document' 'json' 'text'
+                xhr.jajax['dataType']  = '';
                 if(data['dataType'] && typeof data['dataType'] === 'string') {
                     xhr.responseType = data['dataType'].toLowerCase();
+                    xhr.jajax['dataType'] = data['dataType'].toLowerCase();
                 }
 
                 if(data['timeout'] !== undefined) {
@@ -605,10 +607,21 @@ module.exports = (function jUtils() {
                 xhr.onreadystatechange = function (e) {
                     if(this.readyState === 4) {
                         if(this.status === 200) {
-                            if(this.responseType === '' || this.responseType === 'text') {
+                            //if(this.responseType === '' || this.responseType === 'text') {
+                                //this.jajax['success'] && this.jajax['success'](this.responseText, this);
+                            //} else if(this.responseType === 'json') {
+                                //this.jajax['success'] && this.jajax['success'](this.response, this);
+                            //}
+                            if(this.jajax['dataType'] === '' || this.jajax['dataType'] === 'text') {
                                 this.jajax['success'] && this.jajax['success'](this.responseText, this);
-                            } else if(this.responseType === 'json') {
-                                this.jajax['success'] && this.jajax['success'](this.response, this);
+                            } else if(this.jajax['dataType'] === 'json') {
+                                if(Object.prototype.toString.call(this.response) === '[object Object]') {
+                                    this.jajax['success'] && this.jajax['success'](this.response, this);
+                                } else {
+                                    var json = this.response;
+                                    try { json = JSON.parse(this.response); } catch (e) { }
+                                    this.jajax['success'] && this.jajax['success'](json, this);
+                                }
                             }
                         } else {
                             this.jajax['error'] && this.jajax['error'](this.statusText, this);
@@ -634,9 +647,11 @@ module.exports = (function jUtils() {
                                    dataArr.push(s);
                                }
                                return dataArr.join('&');
+                           } else {
+                               return data;
                            }
                        } else {
-                           return '' + data;
+                           return data;
                        }
                     }
                     return '';
@@ -655,11 +670,14 @@ module.exports = (function jUtils() {
                         for(var s in header) {
                             if(s.toLowerCase() === 'contenttype') {
                                 var contenttype = this.__jajax['contentType'][header[s]] || header[s];
-                                xhr.setRequestHeader('Content-Type', contenttype);
                                 if(contenttype.indexOf('x-www-form-urlencoded') > -1) {
+                                    xhr.setRequestHeader('Content-Type', contenttype);
                                     dataType = 'form';
                                 } else if(contenttype.indexOf('json') > -1) {
+                                    xhr.setRequestHeader('Content-Type', contenttype);
                                     dataType = 'json';
+                                } else {
+                                    dataType = null;
                                 }
                                 continue;
                             }

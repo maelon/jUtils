@@ -1,3 +1,7 @@
+v1.2.2 2016-12-07 18:30
+fix ajax upload binary bug
+fix ajax receive json string bug
+
 v1.2.1 2016-10-17 14:34
 publish to npm
 
