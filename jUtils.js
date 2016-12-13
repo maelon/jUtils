@@ -4,8 +4,8 @@
 #       Email: maelon.j@gmail.com
 #  CreateTime: 2016-04-21 22:31
 # Description: jUtils
-#     Version: v1.2.2
-# Updated by maelon 2016-12-07 18:30
+#     Version: v1.2.3
+# Updated by maelon 2016-12-13 10:49
 ===================================================================*/
 
 module.exports = (function jUtils() {
@@ -583,6 +583,7 @@ module.exports = (function jUtils() {
 
             if(xhr) {
                 //'' 'arraybuffer' 'blob' 'document' 'json' 'text'
+                xhr.jajax = {};
                 xhr.jajax['dataType']  = '';
                 if(data['dataType'] && typeof data['dataType'] === 'string') {
                     xhr.responseType = data['dataType'].toLowerCase();
@@ -593,7 +594,6 @@ module.exports = (function jUtils() {
                     xhr.timeout = parseInt(data['timeout']) || 0;
                 }
 
-                xhr.jajax = {};
                 if(data['success'] && typeof data['success'] === 'function') {
                     xhr.jajax['success'] = data['success'];
                 }
