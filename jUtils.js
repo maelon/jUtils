@@ -4,8 +4,8 @@
 #       Email: maelon.j@gmail.com
 #  CreateTime: 2016-04-21 22:31
 # Description: jUtils
-#     Version: v1.2.3
-# Updated by maelon 2016-12-13 10:49
+#     Version: v1.2.4
+# Updated by maelon 2016-12-22 15:20
 ===================================================================*/
 
 module.exports = (function jUtils() {
@@ -30,7 +30,10 @@ module.exports = (function jUtils() {
         'debugAlert': function (content, delay) {
             if (this.isDebug) {
                 setTimeout(function (msg) {
-                    window.alert(msg);
+                    window.alert(
+                        '\u00BB j\u016A\u1E97il\u1E61 Debug Alert \u00AB\n\n' +
+                        msg
+                    );
                 }, delay || 0, content);
             }
         },
