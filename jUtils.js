@@ -4,8 +4,8 @@
 #       Email: maelon.j@gmail.com
 #  CreateTime: 2016-04-21 22:31
 # Description: jUtils
-#     Version: v1.2.4
-# Updated by maelon 2016-12-22 15:20
+#     Version: v1.2.5
+# Updated by maelon 2017-07-13 11:15
 ===================================================================*/
 
 module.exports = (function jUtils() {
@@ -663,6 +663,12 @@ module.exports = (function jUtils() {
                     var data = serializeSendData(sendData, 'form');
                     url = url.replace(/((\?*&*|&*\?*)#\w*)$/, '');
                     url = url + (url.indexOf('?') < 0 ? (data ? '?' : '') : '') + data;
+                    if(data['header'] && Object.prototype.toString.call(data['header']) === '[object Object]') {
+                        var header = data['header'];
+                        for(var s in header) {
+                            xhr.setRequestHeader(s, header[s]);
+                        }
+                    }
                     xhr.open(method, url, async);
                     xhr.send();
                 } else if(method === 'post') {
